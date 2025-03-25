@@ -16,4 +16,7 @@ public interface UserService {
 
     // 특정 아이디를 가진 사용자의 존재 여부 확인
     boolean isUserIdExist(String userId);
+
+    // 사용자의 핸드폰 번호를 출력
+    User getUserByPhoneNum(Integer phoneNum);
 }

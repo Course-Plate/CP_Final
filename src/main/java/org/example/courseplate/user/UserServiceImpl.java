@@ -63,4 +63,9 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUserId(userId);
         return user != null; // 사용자가 존재하면 true, 아니면 false 반환
     }
+
+    @Override
+    public User getUserByPhoneNum(Integer phoneNum) {
+        return userRepository.findByPhoneNum(phoneNum);
+    }
 }

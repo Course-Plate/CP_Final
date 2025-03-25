@@ -51,6 +51,8 @@ dependencies { // Spring Boot 기본 및 웹 관련 의존성
     compileOnly 'org.projectlombok:lombok:1.18.22'                                   // Lombok - 컴파일 시 자동 코드 생성
     annotationProcessor 'org.projectlombok:lombok:1.18.22'                           // Lombok 애노테이션 프로세서
 
+    implementation 'net.nurigo:javaSDK:2.2'
+    implementation 'net.nurigo:sdk:4.3.0'                                            // 문자 인증
 }
 
 tasks.named('test') {
