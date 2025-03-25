@@ -37,7 +37,6 @@ public class UserController {
 
     // 특정 아이디를 가진 사용자 조회
     @GetMapping("/userid/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
     public User getUserByUserId(@PathVariable String userId) {
         return userService.getUserByUserId(userId);
     }
