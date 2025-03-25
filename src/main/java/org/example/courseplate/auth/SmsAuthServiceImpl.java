@@ -5,15 +5,17 @@ import net.nurigo.java_sdk.exceptions.CoolsmsException;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 import java.util.HashMap;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.*;
 
 @Service
 public class SmsAuthServiceImpl implements SmsAuthService {
 
-    private final SmsAuthRepository smsAuthRepository;
+    private final Map<Integer, String> authCodeStorage = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @Value("${coolsms.api.key}")
     private String apiKey;
@@ -24,27 +26,22 @@ public class SmsAuthServiceImpl implements SmsAuthService {
     @Value("${coolsms.from.phone}")
     private String fromPhone;
 
-    public SmsAuthServiceImpl(SmsAuthRepository smsAuthRepository) {
-        this.smsAuthRepository = smsAuthRepository;
-    }
-
     // 6자리 랜덤 인증번호 생성
     private String generateAuthCode() {
         Random random = new Random();
-        int code = 100000 + random.nextInt(900000);
-        return String.valueOf(code);
+        return String.valueOf(100000 + random.nextInt(900000));
     }
 
     // SMS 인증번호 전송
     @Override
-    @Transactional
     public void sendSmsAuthCode(Integer phoneNum) {
         String authCode = generateAuthCode();
 
-        // 기존 인증번호 삭제 후 새로 저장
-        smsAuthRepository.findByPhoneNum(phoneNum).ifPresent(smsAuthRepository::delete);
-        SmsAuth smsAuth = new SmsAuth(phoneNum, authCode);
-        smsAuthRepository.save(smsAuth);
+        // 기존 코드 덮어쓰기
+        authCodeStorage.put(phoneNum, authCode);
+
+        // 5분 후 자동 삭제
+        scheduler.schedule(() -> authCodeStorage.remove(phoneNum), 5, TimeUnit.MINUTES);
 
         // CoolSMS API 연동
         Message message = new Message(apiKey, apiSecret);
@@ -66,7 +63,6 @@ public class SmsAuthServiceImpl implements SmsAuthService {
     // SMS 인증번호 검증
     @Override
     public boolean verifySmsCode(Integer phoneNum, String authCode) {
-        Optional<SmsAuth> smsAuthOpt = smsAuthRepository.findByPhoneNum(phoneNum);
-        return smsAuthOpt.map(smsAuth -> smsAuth.getAuthCode().equals(authCode)).orElse(false);
+        return authCodeStorage.getOrDefault(phoneNum, "").equals(authCode);
     }
 }
