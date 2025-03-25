@@ -30,6 +30,7 @@ public class SecurityConfig {
                                 .requestMatchers( "/").permitAll()
                                 .requestMatchers( "/users/**").permitAll()
                                 .requestMatchers( "/auth/**").permitAll()
+                                .requestMatchers( "/places/**").permitAll()
                                 .anyRequest().authenticated()
                 );
         return  http.build();
