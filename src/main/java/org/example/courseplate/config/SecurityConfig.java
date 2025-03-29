@@ -14,6 +14,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
 
         http
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/api/**").permitAll() // 이 경로는 모두 허용
+                        .anyRequest().authenticated()           // 나머지는 인증 필요
+                );
+                /*
                 //crsf(Cross site Request forgery) 설정 disable
                 .csrf((csrfConfig) ->
                         csrfConfig.disable()
@@ -32,7 +37,7 @@ public class SecurityConfig {
                                 .requestMatchers( "/auth/**").permitAll()
                                 .requestMatchers( "/places/**").permitAll()
                                 .anyRequest().authenticated()
-                );
+                );*/
         return  http.build();
     }
 
