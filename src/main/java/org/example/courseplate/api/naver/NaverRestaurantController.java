@@ -13,7 +13,7 @@ public class NaverRestaurantController {
 
     @GetMapping("/fetch")
     public ResponseEntity<String> fetchRestaurants(@RequestParam String location) {
-        naverService.searchAndSaveRestaurants("맛집", location);
-        return ResponseEntity.ok("맛집 저장 완료!");
+        String resultJson = naverService.searchRestaurants("맛집", location);
+        return ResponseEntity.ok(resultJson); // JSON 그대로 반환
     }
 }

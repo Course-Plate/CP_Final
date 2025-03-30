@@ -3,8 +3,6 @@ package org.example.courseplate.api.naver;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.example.courseplate.domain.restaurant.Restaurant;
-import org.example.courseplate.domain.restaurant.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -19,15 +17,16 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class NaverLocalSearchService {
 
-    @Value("${naver.client-id}")
+    @Value("d0rEPpWd8iw0pnMQurZM")
     private String clientId;
 
-    @Value("${naver.client-secret}")
+    @Value("ke8hlrD2jL")
     private String clientSecret;
 
-    private final RestaurantRepository restaurantRepository;
+    // RestaurantRepository는 사용하지 않음
+    // private final RestaurantRepository restaurantRepository;
 
-    public void searchAndSaveRestaurants(String query, String location) {
+    public String searchRestaurants(String query, String location) {
         try {
             String apiURL = "https://openapi.naver.com/v1/search/local.json?query="
                     + URLEncoder.encode(query + " " + location, "UTF-8")
@@ -46,22 +45,12 @@ public class NaverLocalSearchService {
             while ((line = br.readLine()) != null) response.append(line);
             br.close();
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode root = objectMapper.readTree(response.toString());
-            JsonNode items = root.path("items");
-
-            for (JsonNode item : items) {
-                Restaurant restaurant = new Restaurant();
-                restaurant.setName(item.path("title").asText().replaceAll("<[^>]*>", ""));
-                restaurant.setCategory(item.path("category").asText());
-                restaurant.setAddress(item.path("roadAddress").asText());
-                restaurant.setRating(0.0);
-
-                restaurantRepository.save(restaurant);
-            }
+            // 받아온 JSON 문자열 그대로 반환
+            return response.toString();
 
         } catch (Exception e) {
             e.printStackTrace();
+            return "{\"error\": \"네이버 API 호출 실패\"}";
         }
     }
 }
