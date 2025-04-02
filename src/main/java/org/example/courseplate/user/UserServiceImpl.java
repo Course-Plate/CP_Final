@@ -33,11 +33,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(String userId){
         User user = userRepository.findByUserId(userId);
-        if (user != null) {
-            userRepository.delete(user);
-        } else {
-            throw new RuntimeException("유저 아이디가 없습니다.");
+        if (user == null) {
+            throw new IllegalArgumentException("유저 아이디가 없습니다.");
         }
+        userRepository.delete(user);
     }
 
     // 사용자 아이디로 사용자 정보를 가져오는 메서드
@@ -50,12 +49,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public User login(String userId, String password) {
         User user = userRepository.findByUserId(userId);
-        // 사용자가 존재하고 비밀번호가 일치하는지 확인
-        if (user != null && bCryptPasswordEncoder.matches(password, user.getPassword())) {
-            return user; // 비밀번호가 일치하면 사용자 객체 반환
+        if (user == null) {
+            throw new IllegalArgumentException("유저 아이디가 존재하지 않습니다.");
         }
-        return null; // 아이디나 비밀번호가 일치하지 않는 경우 null 반환
+
+        boolean passwordMatches = bCryptPasswordEncoder.matches(password, user.getPassword());
+
+        if (!passwordMatches) {
+            throw new IllegalArgumentException("아이디 또는 비밀번호가 올바르지 않습니다.");
+        }
+
+        return user;
     }
+
 
     // 사용자 아이디가 존재하는지 확인하는 메서드
     @Override

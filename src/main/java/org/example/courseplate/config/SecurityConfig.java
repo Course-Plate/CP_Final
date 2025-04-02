@@ -53,7 +53,7 @@ public class SecurityConfig {
     //401 예외처리
     private final AuthenticationEntryPoint unauthorizedEntryPoint =
             (request, response, authException) -> {
-                ErrorResponse fail = new ErrorResponse(HttpStatus.UNAUTHORIZED, "허가 받지 못하였습니다...");
+                ErrorResponse fail = new ErrorResponse(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED...");
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 String json = new ObjectMapper().writeValueAsString(fail);
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -65,7 +65,7 @@ public class SecurityConfig {
     //403 예외처리
     private final AccessDeniedHandler accessDeniedHandler =
             (request, response, accessDeniedException) -> {
-                ErrorResponse fail = new ErrorResponse(HttpStatus.FORBIDDEN, "금지되었습니다...");
+                ErrorResponse fail = new ErrorResponse(HttpStatus.FORBIDDEN, "FORBIDDEN...");
                 response.setStatus(HttpStatus.FORBIDDEN.value());
                 String json = new ObjectMapper().writeValueAsString(fail);
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
