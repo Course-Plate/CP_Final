@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.example.courseplate.domain.member.Role;
 
 @Document(collection = "User")
 @Getter
@@ -19,5 +20,7 @@ public class User {
     private String phoneNum; // 사용자 전화번호
     private String email; // 사용자 이메일
     private String sex; // 사용자 성별
+
+    private Role role;
 
 }

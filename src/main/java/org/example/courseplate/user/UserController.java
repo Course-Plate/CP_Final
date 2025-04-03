@@ -52,7 +52,9 @@ public class UserController {
         String password = credentials.get("password");
 
         userService.login(userId, password); // 로그인 검증 (예외 발생 시 400 응답)
-        String token = jwtUtil.generateToken(userId); // JWT 토큰 생성
+        String role = String.valueOf(userService.getUserByUserId(userId).getRole()); // DB에서 역할(Role) 가져오기
+
+        String token = jwtUtil.generateToken(userId, role); // JWT 토큰 생성 (role 포함)
 
         return ResponseEntity.ok(Map.of("token", "Bearer " + token));
     }
