@@ -22,7 +22,7 @@ public class UserServiceImpl implements UserService {
     public User signup(User user) {
         String hashedPassword = bCryptPasswordEncoder.encode(user.getPassword());
         user.setPassword(hashedPassword);
-        user.setRole(Role.USER);
+        user.setRole(Role.ROLE_USER);
         return userRepository.save(user);
     }
 

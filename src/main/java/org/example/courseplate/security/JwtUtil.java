@@ -18,12 +18,11 @@ public class JwtUtil {
 
     // JWT 생성 (userId + role 포함)
     public String generateToken(String userId, String role) {
-        System.out.println("SECRET_KEY: " + SECRET_KEY);  // 확인용 로그
         return Jwts.builder()
                 .setSubject(userId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .addClaims(Map.of("role", "ROLE_e"+role)) // 역할 정보 추가
+                .addClaims(Map.of("role", role)) // 역할 정보 추가
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }

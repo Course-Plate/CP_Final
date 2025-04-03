@@ -46,7 +46,8 @@
                     //권한설정
                     .authorizeHttpRequests((authorizeRequests) ->
                             authorizeRequests
-                                    .requestMatchers( "/places/add").permitAll()
+                                    .requestMatchers("/error").permitAll()
+                                    .requestMatchers( "/places/add").hasRole("USER")
                                     .requestMatchers( "/users/**").permitAll()
                                     .requestMatchers( "/auth/**").permitAll()
                                     .anyRequest().authenticated()

@@ -33,9 +33,6 @@
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                System.out.println("User authenticated: " + userId);
-                System.out.println(jwtUtil.validateToken(token));
-
             }
 
             chain.doFilter(request, response);
@@ -43,10 +40,8 @@
 
         private String getJwtFromRequest(HttpServletRequest request) {
             String bearerToken = request.getHeader("Authorization");
-            System.out.println("Authorization Header: " + bearerToken);  // 로그 추가
             if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
                 String token = bearerToken.substring(7);
-                System.out.println("Extracted Token: " + token);  // 추출된 토큰 확인
                 return token;
             }
             return null;
