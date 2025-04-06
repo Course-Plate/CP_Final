@@ -31,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String userId = jwtUtil.validateToken(token);
             String role = jwtUtil.getRoleFromToken(token);
 
-            // 역할(Role)을 GrantedAuthority로 변환
+            // 역할(Role)을 허가된 권환으로 변환
             List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
 
             // 사용자 객체 생성 (권한 포함)
