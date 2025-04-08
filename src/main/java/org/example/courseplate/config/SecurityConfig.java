@@ -46,11 +46,8 @@
                     //권한설정
                     .authorizeHttpRequests((authorizeRequests) ->
                             authorizeRequests
-                                    .requestMatchers("/error").permitAll()
-                                    .requestMatchers( "/places/add").hasRole("USER")
-                                    .requestMatchers( "/users/**").permitAll()
-                                    .requestMatchers( "/auth/**").permitAll()
-                                    .anyRequest().authenticated()
+                                    .requestMatchers("/users/login", "/users/signup").permitAll()  // 전체 접근 허용
+                                    .anyRequest().hasRole("USER")
                     )
                     .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class) //JWT 필터 등록
                     .exceptionHandling((exceptionConfig) ->
