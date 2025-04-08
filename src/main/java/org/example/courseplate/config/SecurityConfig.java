@@ -47,7 +47,7 @@
                     .authorizeHttpRequests((authorizeRequests) ->
                             authorizeRequests
                                     .requestMatchers("/users/login", "/users/signup").permitAll()  // 전체 접근 허용
-                                    .anyRequest().hasRole("USER")
+                                    .anyRequest().permitAll()
                     )
                     .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class) //JWT 필터 등록
                     .exceptionHandling((exceptionConfig) ->

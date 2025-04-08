@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Document("Review")
 @Getter
 @Setter
-public class    Review {
+public class Review {
 
     @Id
     private String id;
@@ -21,7 +21,7 @@ public class    Review {
     private String placeId;             //가게 아이디
     private String placeName;           //가게 이름
 
-    private Integer score;              //점수
+    private Integer score;              //점수(1~5)
 
     private String reviewContent;       //유저 리뷰
     private String bossContent;         //사장 대댓글
@@ -29,5 +29,4 @@ public class    Review {
     private byte[] reviewImg;           //사진들
 
     private LocalDateTime createdAt;    //게시일
-    private LocalDateTime updatedAt;    //수정일
 }
