@@ -11,8 +11,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Place {
 
     @Id
-    private String id; //장소 ID
+    private String id;
 
+    private String placeId; //장소 ID
     private String placeName; //장소이름
     private String address; //장소 주소
     private String explain; //장소 설명
