@@ -52,7 +52,7 @@
                                     .requestMatchers( "/auth/**").permitAll()
                                     .anyRequest().authenticated()
                     )
-                    .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class) // 필터 등록
+                    .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class) //JWT 필터 등록
                     .exceptionHandling((exceptionConfig) ->
                             exceptionConfig.authenticationEntryPoint(unauthorizedEntryPoint).accessDeniedHandler(accessDeniedHandler)
                     ); // 401 403 관련 예외처리
@@ -91,7 +91,7 @@
             private final String message;
         }
 
-
+        //패스워드 암호화
         @Bean
         public BCryptPasswordEncoder encode() {
             return new BCryptPasswordEncoder();

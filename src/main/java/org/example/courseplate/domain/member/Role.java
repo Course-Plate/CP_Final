@@ -3,6 +3,7 @@ package org.example.courseplate.domain.member;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+//권한 리스트
 @Getter
 @RequiredArgsConstructor
 public enum Role {
