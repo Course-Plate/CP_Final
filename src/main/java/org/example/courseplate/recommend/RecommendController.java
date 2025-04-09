@@ -1,7 +1,7 @@
-package org.example.courseplate.api.recommend;
+package org.example.courseplate.recommend;
 
 import lombok.RequiredArgsConstructor;
-import org.example.courseplate.domain.restaurant.Restaurant;
+import org.example.courseplate.restaurant.Restaurant;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

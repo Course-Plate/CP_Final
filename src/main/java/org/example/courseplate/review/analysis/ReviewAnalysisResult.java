@@ -1,5 +1,5 @@
 
-package org.example.courseplate.api.review.analysis;
+package org.example.courseplate.review.analysis;
 
 import lombok.Data;
 

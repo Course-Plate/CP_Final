@@ -1,4 +1,4 @@
-package org.example.courseplate.domain.review;
+package org.example.courseplate.review;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 

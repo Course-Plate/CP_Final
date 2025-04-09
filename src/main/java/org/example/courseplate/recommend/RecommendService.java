@@ -1,10 +1,10 @@
-package org.example.courseplate.api.recommend;
+package org.example.courseplate.recommend;
 
 import lombok.RequiredArgsConstructor;
-import org.example.courseplate.domain.preference.PreferenceProfile;
-import org.example.courseplate.domain.preference.PreferenceProfileRepository;
-import org.example.courseplate.domain.restaurant.Restaurant;
-import org.example.courseplate.domain.restaurant.RestaurantRepository;
+import org.example.courseplate.preference.PreferenceProfile;
+import org.example.courseplate.preference.PreferenceProfileRepository;
+import org.example.courseplate.restaurant.Restaurant;
+import org.example.courseplate.restaurant.RestaurantRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

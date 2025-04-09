@@ -1,4 +1,4 @@
-package org.example.courseplate.domain.restaurant;
+package org.example.courseplate.restaurant;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;

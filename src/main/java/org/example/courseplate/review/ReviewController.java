@@ -1,9 +1,8 @@
-package org.example.courseplate.api.review;
+package org.example.courseplate.review;
 
 import lombok.RequiredArgsConstructor;
-import org.example.courseplate.api.review.analysis.ReviewAnalysisClient;
-import org.example.courseplate.api.review.analysis.ReviewAnalysisResult;
-import org.example.courseplate.domain.review.Review;
+import org.example.courseplate.review.analysis.ReviewAnalysisClient;
+import org.example.courseplate.review.analysis.ReviewAnalysisResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

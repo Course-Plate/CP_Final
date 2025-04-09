@@ -6,43 +6,52 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                .authorizeHttpRequests(authz -> authz
+                .csrf(csrf -> csrf.disable()) // CSRF 비활성화
+                .headers(headers -> headers.frameOptions(frame -> frame.disable())) // h2-console 같은 용도
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/**").permitAll() // 이 경로는 모두 허용
-                        .anyRequest().authenticated()           // 나머지는 인증 필요
+                        .anyRequest().permitAll() // 나머지도 일단 허용 (개발용)
                 );
-                /*
-                //crsf(Cross site Request forgery) 설정 disable
-                .csrf((csrfConfig) ->
-                        csrfConfig.disable()
-                )
-                //h2-console 화면을 사용하기 위해 해당옵션 disable
-                .headers((headerConfig) ->
-                        headerConfig.frameOptions(frameOptionsConfig ->
-                                frameOptionsConfig.disable()
-                        )
-                )
-                //권한설정
-                .authorizeHttpRequests((authorizeRequests) ->
-                        authorizeRequests
-                                .requestMatchers( "/").permitAll()
-                                .requestMatchers( "/users/**").permitAll()
-                                .requestMatchers( "/auth/**").permitAll()
-                                .requestMatchers( "/places/**").permitAll()
-                                .anyRequest().authenticated()
-                );*/
-        return  http.build();
+
+        return http.build();
     }
 
     @Bean
     public BCryptPasswordEncoder encode() {
         return new BCryptPasswordEncoder();
     }
+
+    // ✅ CORS 설정
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("*") // 필요 시 http://localhost:19006 등으로 제한
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*");
+            }
+        };
+    }@Configuration
+    public class WebConfig implements WebMvcConfigurer {
+        @Override
+        public void addCorsMappings(CorsRegistry registry) {
+            registry.addMapping("/**")
+                    .allowedOrigins("*") // 또는 프론트 IP만
+                    .allowedMethods("GET", "POST", "PUT", "DELETE");
+        }
+    }
+
 }

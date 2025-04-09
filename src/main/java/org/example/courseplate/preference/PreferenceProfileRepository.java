@@ -1,4 +1,4 @@
-package org.example.courseplate.domain.preference;
+package org.example.courseplate.preference;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 

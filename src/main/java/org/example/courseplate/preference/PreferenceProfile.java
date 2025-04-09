@@ -1,4 +1,4 @@
-package org.example.courseplate.domain.preference;
+package org.example.courseplate.preference;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;

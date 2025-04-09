@@ -1,7 +1,7 @@
-package org.example.courseplate.api.review.analysis;
+package org.example.courseplate.review.analysis;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.courseplate.domain.review.Review;
+import org.example.courseplate.review.Review;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;

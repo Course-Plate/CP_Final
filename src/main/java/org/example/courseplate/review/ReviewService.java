@@ -1,8 +1,6 @@
-package org.example.courseplate.api.review;
+package org.example.courseplate.review;
 
 import lombok.RequiredArgsConstructor;
-import org.example.courseplate.domain.review.Review;
-import org.example.courseplate.domain.review.ReviewRepository;
 import org.springframework.stereotype.Service;
 
 @Service
