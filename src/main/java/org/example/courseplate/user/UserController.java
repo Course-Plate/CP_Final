@@ -24,13 +24,6 @@ public class UserController {
         this.jwtUtil = jwtUtil;
     }
 
-    // 새로운 사용자 생성
-    @PostMapping("/signup")
-    public ResponseEntity<User> signup(@RequestBody User user) {
-        User createdUser = userService.signup(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
-    }
-
     @PreAuthorize("isAuthenticated()") // 로그인한 사용자만 허용
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteUser(@RequestParam String userId) {
@@ -43,20 +36,6 @@ public class UserController {
     @GetMapping("/userid/{userId}")
     public User getUserByUserId(@PathVariable String userId) {
         return userService.getUserByUserId(userId);
-    }
-
-    // 로그인 + JWT 토큰 발급
-    @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> credentials) {
-        String userId = credentials.get("userId");
-        String password = credentials.get("password");
-
-        userService.login(userId, password); // 로그인 검증 (예외 발생 시 400 응답)
-        String role = String.valueOf(userService.getUserByUserId(userId).getRole()); // DB에서 역할(Role) 가져오기
-
-        String token = jwtUtil.generateToken(userId, role); // JWT 토큰 생성 (role 포함)
-
-        return ResponseEntity.ok(Map.of("token", "Bearer " + token));
     }
 
     // 특정 아이디를 가진 사용자의 존재 여부 확인
