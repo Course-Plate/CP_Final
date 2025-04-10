@@ -25,7 +25,7 @@ public class UserController {
     }
 
     // 새로운 사용자 생성
-    @PostMapping("signuprnj")
+    @PostMapping("/signup")
     public ResponseEntity<User> signup(@RequestBody User user) {
         User createdUser = userService.signup(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
