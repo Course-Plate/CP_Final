@@ -29,5 +29,5 @@ public class Review {
     private byte[] reviewImg;           //사진들
 
     private LocalDateTime createdAt;    //게시일
-    private LocalDateTime UpdatedAt;    //수정일
+    private LocalDateTime UpdatedAt;    //수정 유무
 }

@@ -20,23 +20,24 @@ public class ReviewServiceImpl implements ReviewService {
         return reviewRepository.save(review);
     }
 
-    //리뷰 수정
-    @Override
-    public Review updateReview(String id, Review updatedReview) {
-        Optional<Review> optionalReview = reviewRepository.findById(id);
+        //리뷰 수정(점수, 리뷰내용 , 사진만 수정 가능)
+        @Override
+        public Review updateReview(String id, Review updatedReview) {
+            Optional<Review> optionalReview = reviewRepository.findById(id);
 
-        if (optionalReview.isPresent()) {
-            Review review = optionalReview.get();
-            review.setScore(updatedReview.getScore());
-            review.setReviewContent(updatedReview.getReviewContent());
-            review.setBossContent(updatedReview.getBossContent());
-            review.setReviewImg(updatedReview.getReviewImg());
-            review.setUpdatedAt(LocalDateTime.now());
-            return reviewRepository.save(review);
-        } else {
-            throw new IllegalArgumentException("리뷰를 찾을 수 없습니다. ID: " + id);
+            if (optionalReview.isPresent()) {
+                Review review = optionalReview.get();
+                review.setScore(updatedReview.getScore());
+                review.setReviewContent(updatedReview.getReviewContent());
+                review.setBossContent(updatedReview.getBossContent());
+                review.setReviewImg(updatedReview.getReviewImg());
+                review.setCreatedAt(LocalDateTime.now());
+                review.setUpdatedAt(LocalDateTime.now());
+                return reviewRepository.save(review);
+            } else {
+                throw new IllegalArgumentException("리뷰를 찾을 수 없습니다. ID: " + id);
+            }
         }
-    }
 
     //리뷰 삭제
     @Override
