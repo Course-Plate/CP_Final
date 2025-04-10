@@ -6,7 +6,6 @@ public interface AuthService {
     void sendSmsAuthCode(Integer phoneNum);
     boolean verifySmsCode(Integer phoneNum, String authCode);
 
-
     // 아이디와 비밀번호를 사용하여 로그인
     User login(String userId, String password);
 

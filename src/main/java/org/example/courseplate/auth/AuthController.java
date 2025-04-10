@@ -13,12 +13,12 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final AuthService smsAuthService;
+    private final AuthService authService;
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
-    public AuthController(AuthService smsAuthService, UserService userService, JwtUtil jwtUtil) {
-        this.smsAuthService = smsAuthService;
+    public AuthController(AuthService authService, UserService userService, JwtUtil jwtUtil) {
+        this.authService = authService;
         this.userService = userService;
         this.jwtUtil = jwtUtil;
     }
@@ -27,7 +27,7 @@ public class AuthController {
     // 새로운 사용자 생성
     @PostMapping("/signup")
     public ResponseEntity<User> signup(@RequestBody User user) {
-        User createdUser = userService.signup(user);
+        User createdUser = authService.signup(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
@@ -37,7 +37,8 @@ public class AuthController {
         String userId = credentials.get("userId");
         String password = credentials.get("password");
 
-        userService.login(userId, password); // 로그인 검증 (예외 발생 시 400 응답)
+
+        authService.login(userId, password); // 로그인 검증 (예외 발생 시 400 응답)
         String role = String.valueOf(userService.getUserByUserId(userId).getRole()); // DB에서 역할(Role) 가져오기
 
         String token = jwtUtil.generateToken(userId, role); // JWT 토큰 생성 (role 포함)
@@ -49,7 +50,7 @@ public class AuthController {
     @PostMapping("/send-sms")
     public ResponseEntity<String> sendSms(@RequestBody Map<String, Integer> request) {
         Integer phoneNum = request.get("phoneNum");
-        smsAuthService.sendSmsAuthCode(phoneNum);
+        authService.sendSmsAuthCode(phoneNum);
         return ResponseEntity.ok("인증번호가 발송되었습니다.");
     }
 
@@ -59,7 +60,7 @@ public class AuthController {
         Integer phoneNum = Integer.valueOf(request.get("phoneNum"));
         String authCode = request.get("authCode");
 
-        boolean isValid = smsAuthService.verifySmsCode(phoneNum, authCode);
+        boolean isValid = authService.verifySmsCode(phoneNum, authCode);
         return ResponseEntity.ok(isValid);
     }
 }
