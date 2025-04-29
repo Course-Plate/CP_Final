@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.courseplate.naver.NaverLocalSearchService;
-import org.example.courseplate.preference.PreferenceProfile;
-import org.example.courseplate.preference.PreferenceProfileRepository;
+import org.example.courseplate.preference.PreferenceProfileService;
 import org.example.courseplate.restaurant.Restaurant;
 import org.example.courseplate.restaurant.RestaurantRepository;
 import org.springframework.stereotype.Service;
@@ -18,40 +17,33 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SurveyService {
 
-    private final PreferenceProfileRepository preferenceRepo;
+    private final PreferenceProfileService preferenceProfileService;
     private final RestaurantRepository restaurantRepo;
     private final NaverLocalSearchService naverLocalSearchService;
 
-    // ✅ 사용자 프로필 저장 (긍정 키워드만 저장)
+    // ✅ 사용자 설문 결과 기반 프로필 저장 (통합 구조에 저장)
     public void saveUserProfile(String userId, List<String> keywords) {
-        PreferenceProfile profile = preferenceRepo.findByUserId(userId);
-        if (profile == null) {
-            profile = new PreferenceProfile();
-            profile.setUserId(userId);
-        }
-
         List<String> atmospheres = keywords.stream()
                 .filter(k -> k.contains("조용") || k.contains("단체") || k.contains("분위기"))
                 .toList();
+
         List<String> categories = keywords.stream()
                 .filter(k -> !atmospheres.contains(k))
                 .toList();
 
-        profile.setLikedFoods(categories);
-        profile.setPreferredAtmospheres(atmospheres);
-        preferenceRepo.save(profile);
+        preferenceProfileService.saveSurveyKeywords(userId, categories, atmospheres);
     }
 
-    // ✅ 네이버 API 호출 + 필터링 + 결과 저장 + 반환
+    // ✅ 설문 기반 추천 로직
     public List<Restaurant> recommendBasedOnSurvey(SurveyDto surveyDto) {
         // 1. 사용자 프로필 저장
         saveUserProfile(surveyDto.getUserId(), surveyDto.getPositiveKeywords());
 
-        // 2. 네이버 API에서 음식점 검색
-        String rawJson = naverLocalSearchService.searchRestaurants("맛집", "서울"); // 위치는 추후 동적으로
+        // 2. 네이버 API 검색
+        String rawJson = naverLocalSearchService.searchRestaurants("맛집", "서울");
         List<Restaurant> allResults = parseJsonToRestaurants(rawJson);
 
-        // 3. 부정 키워드 포함된 음식점 제거
+        // 3. 부정 키워드로 필터링
         List<String> negative = surveyDto.getNegativeKeywords();
         List<Restaurant> filteredResults = allResults.stream()
                 .filter(r -> negative.stream().noneMatch(k ->
@@ -60,14 +52,13 @@ public class SurveyService {
                                 r.getAtmosphere().contains(k)))
                 .collect(Collectors.toList());
 
-        // ✅ 4. 필터링된 결과 MongoDB에 저장
+        // 4. 결과 저장
         restaurantRepo.saveAll(filteredResults);
 
-        // 5. 결과 반환
         return filteredResults;
     }
 
-    // ✅ 네이버 API JSON 파싱
+    // ✅ 네이버 API 응답 파싱
     private List<Restaurant> parseJsonToRestaurants(String json) {
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -81,7 +72,7 @@ public class SurveyService {
                     r.setAddress(item.get("address").asText());
                     r.setPhone(item.has("telephone") ? item.get("telephone").asText() : "");
                     r.setCategory(item.get("category").asText());
-                    r.setAtmosphere(""); // 기본값으로 빈 문자열
+                    r.setAtmosphere(""); // 기본값
                     r.setRating(0.0);    // 기본값
                     list.add(r);
                 }

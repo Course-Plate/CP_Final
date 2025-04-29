@@ -1,8 +1,6 @@
 package org.example.courseplate.review;
 
 import lombok.RequiredArgsConstructor;
-import org.example.courseplate.review.analysis.ReviewAnalysisClient;
-import org.example.courseplate.review.analysis.ReviewAnalysisResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,12 +10,12 @@ import org.springframework.web.bind.annotation.*;
 public class ReviewController {
 
     private final ReviewService reviewService;
-    private final ReviewAnalysisClient analysisClient;
 
     @PostMapping
-    public ResponseEntity<ReviewAnalysisResult> submitReview(@RequestBody Review review) {
-        Review saved = reviewService.saveReview(review);
-        ReviewAnalysisResult analysisResult = analysisClient.analyzeReview(saved);
-        return ResponseEntity.ok(analysisResult);
+    public ResponseEntity<Review> submitReview(@RequestBody Review review) {
+        // ✅ 리뷰 저장 + AI 분석 + 결과 반영까지 Service에서 처리
+        Review analyzedReview = reviewService.saveReviewWithAnalysis(review);
+
+        return ResponseEntity.ok(analyzedReview);
     }
 }
