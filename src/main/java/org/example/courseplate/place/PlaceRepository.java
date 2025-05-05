@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PlaceRepository extends MongoRepository<Place, String> {
     Place findByPlaceName(String placeName);
+    Place findByPlaceId(String placeId);
 }
