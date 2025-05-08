@@ -53,7 +53,29 @@ dependencies { // Spring Boot 기본 및 웹 관련 의존성
 
     implementation 'net.nurigo:javaSDK:2.2'
     implementation 'net.nurigo:sdk:4.3.0'                                            // 문자 인증
+
+    implementation ('org.springframework.boot:spring-boot-starter')
+    implementation ('org.springframework.boot:spring-boot-starter-logging') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
+    implementation('org.springframework.boot:spring-boot-starter-web') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
+    implementation('org.springframework.boot:spring-boot-starter-data-jpa') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
+    implementation('org.springframework.boot:spring-boot-starter-security') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
+
 }
+
+configurations {
+    all {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
+}
+
 
 tasks.named('test') {
     useJUnitPlatform()

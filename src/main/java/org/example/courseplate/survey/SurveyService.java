@@ -9,8 +9,7 @@ import org.example.courseplate.restaurant.Restaurant;
 import org.example.courseplate.restaurant.RestaurantRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,39 +20,25 @@ public class SurveyService {
     private final RestaurantRepository restaurantRepo;
     private final NaverLocalSearchService naverLocalSearchService;
 
-    // ✅ 사용자 설문 결과 기반 프로필 저장 (통합 구조에 저장)
-    public void saveUserProfile(String userId, List<String> keywords) {
-        List<String> atmospheres = keywords.stream()
-                .filter(k -> k.contains("조용") || k.contains("단체") || k.contains("분위기"))
-                .toList();
-
-        List<String> categories = keywords.stream()
-                .filter(k -> !atmospheres.contains(k))
-                .toList();
-
-        preferenceProfileService.saveSurveyKeywords(userId, categories, atmospheres);
+    // ✅ 사용자 설문 결과 기반 프로필 저장 (누적 저장)
+    public void saveUserProfile(String userId, List<String> positive, List<String> negative) {
+        preferenceProfileService.saveSurveyKeywords(userId, positive, negative);
     }
 
     // ✅ 설문 기반 추천 로직
     public List<Restaurant> recommendBasedOnSurvey(SurveyDto surveyDto) {
         // 1. 사용자 프로필 저장
-        saveUserProfile(surveyDto.getUserId(), surveyDto.getPositiveKeywords());
+        saveUserProfile(surveyDto.getUserId(), surveyDto.getPositiveKeywords(), surveyDto.getNegativeKeywords());
 
-        // 2. 네이버 API 검색
+        // 2. 네이버 API 검색 (임시적으로 서울로 지정)
         String rawJson = naverLocalSearchService.searchRestaurants("맛집", "서울");
         List<Restaurant> allResults = parseJsonToRestaurants(rawJson);
 
         // 3. 부정 키워드로 필터링
         List<String> negative = surveyDto.getNegativeKeywords();
         List<Restaurant> filteredResults = allResults.stream()
-                .filter(r -> negative.stream().noneMatch(k ->
-                        r.getRestaurantName().contains(k) ||
-                                r.getCategory().contains(k) ||
-                                r.getAtmosphere().contains(k)))
+                .filter(r -> negative.stream().noneMatch(k -> r.getRestaurantName().contains(k)))
                 .collect(Collectors.toList());
-
-        // 4. 결과 저장
-        restaurantRepo.saveAll(filteredResults);
 
         return filteredResults;
     }
@@ -70,10 +55,8 @@ public class SurveyService {
                     Restaurant r = new Restaurant();
                     r.setRestaurantName(item.get("title").asText().replaceAll("<.*?>", ""));
                     r.setAddress(item.get("address").asText());
-                    r.setPhone(item.has("telephone") ? item.get("telephone").asText() : "");
                     r.setCategory(item.get("category").asText());
-                    r.setAtmosphere(""); // 기본값
-                    r.setRating(0.0);    // 기본값
+                    r.setKeywords(List.of(item.get("category").asText().split(", "))); // 카테고리로 키워드 설정
                     list.add(r);
                 }
             }
