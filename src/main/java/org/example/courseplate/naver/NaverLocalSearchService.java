@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
+import org.example.courseplate.preference.PreferenceProfileRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,18 +16,40 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class NaverLocalSearchService {
 
-    @Value("d0rEPpWd8iw0pnMQurZM")
+    @Value("${naver.client-id}")
     private String clientId;
 
-    @Value("ke8hlrD2jL")
+    @Value("${naver.client-secret}")
     private String clientSecret;
 
     private final ObjectMapper mapper = new ObjectMapper();
+    private final PreferenceProfileRepository preferenceRepo;
+
+    // 사용자 프로필에서 키워드 자동 불러오기
+    public String searchAndFilterByUserProfile(String query, String location, String userId) {
+        // MongoDB에서 사용자 프로필 불러오기
+        var profile = preferenceRepo.findByUserId(userId);
+        if (profile == null) {
+            return "{\"error\": \"사용자 프로필을 찾을 수 없습니다.\"}";
+        }
+
+        // 사용자 선호/비선호 키워드 가져오기
+        Set<String> likedKeywords = (Set<String>) profile.getSurvey().getLikeKeywords();
+        Set<String> dislikedKeywords = (Set<String>) profile.getSurvey().getDislikeKeywords();
+        likedKeywords.addAll(profile.getReview().getPositiveKeywords());
+        dislikedKeywords.addAll(profile.getReview().getNegativeKeywords());
+
+        // 네이버 API 호출 및 필터링
+        String rawJson = searchRestaurants(query, location);
+        return filterRestaurants(rawJson, likedKeywords.stream().toList(), dislikedKeywords.stream().toList());
+    }
 
     // 네이버 API 호출
     public String searchRestaurants(String query, String location) {
@@ -84,11 +107,4 @@ public class NaverLocalSearchService {
             return "{\"error\": \"JSON 필터링 실패\"}";
         }
     }
-
-    // 통합 메서드: 호출 + 필터링
-    public String searchAndFilter(String query, String location, List<String> liked, List<String> disliked) {
-        String rawJson = searchRestaurants(query, location);
-        return filterRestaurants(rawJson, liked, disliked);
-    }
 }
-

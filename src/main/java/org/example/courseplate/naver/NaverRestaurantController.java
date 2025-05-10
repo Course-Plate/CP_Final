@@ -11,14 +11,12 @@ public class NaverRestaurantController {
 
     private final NaverLocalSearchService naverService;
 
-    @PostMapping("/filtered")
-    public ResponseEntity<String> fetchFilteredRestaurants(
+    @GetMapping("/filtered")
+    public ResponseEntity<String> fetchFilteredRestaurantsByUser(
             @RequestParam String location,
-            @RequestBody KeywordFilterRequest filterRequest
+            @RequestParam String userId
     ) {
-        String resultJson = naverService.searchAndFilter("맛집", location,
-                filterRequest.getLikedKeywords(),
-                filterRequest.getDislikedKeywords());
+        String resultJson = naverService.searchAndFilterByUserProfile("맛집", location, userId);
         return ResponseEntity.ok(resultJson);
     }
 }
