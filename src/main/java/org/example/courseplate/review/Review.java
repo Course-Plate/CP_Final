@@ -1,28 +1,33 @@
 package org.example.courseplate.review;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
-@Document(collection = "reviews")
+@Document("Review")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Review {
+
     @Id
     private String id;
 
-    private String userId;
-    private String restaurantName;
-    private String menu;
-    private String content;
-    private String date;
+    private String userId;              //유저 아이디
+    private String userName;            //유저 이름
 
-    // ✅ 추가해야 하는 부분
-    private String sentiment;  // 감정 결과 (positive / negative)
-    private List<String> keywords;  // 추출된 키워드 리스트
+    private String placeId;             //가게 아이디
+    private String placeName;           //가게 이름
+
+    private Integer score;              //점수(1~5)
+
+    private String reviewContent;       //유저 리뷰
+    private String bossContent;         //사장 대댓글
+
+    private byte[] reviewImg;           //사진들
+
+    private LocalDateTime createdAt;    //게시일
+    private LocalDateTime UpdatedAt;    //수정 유무
 }

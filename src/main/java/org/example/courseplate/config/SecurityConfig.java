@@ -1,57 +1,96 @@
-package org.example.courseplate.config;
+    package org.example.courseplate.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+    import com.fasterxml.jackson.databind.ObjectMapper;
+    import lombok.Getter;
+    import lombok.RequiredArgsConstructor;
+    import org.example.courseplate.security.JwtAuthenticationFilter;
+    import org.example.courseplate.security.JwtUtil;
+    import org.springframework.context.annotation.Bean;
+    import org.springframework.context.annotation.Configuration;
+    import org.springframework.http.HttpStatus;
+    import org.springframework.http.MediaType;
+    import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+    import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+    import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+    import org.springframework.security.web.AuthenticationEntryPoint;
+    import org.springframework.security.web.SecurityFilterChain;
+    import org.springframework.security.web.access.AccessDeniedHandler;
+    import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;;
 
-@Configuration
-@EnableWebSecurity
-public class SecurityConfig {
+    import java.io.PrintWriter;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @Configuration
+    @EnableWebSecurity
+    public class SecurityConfig {
 
-        http
-                .csrf(csrf -> csrf.disable()) // CSRF 비활성화
-                .headers(headers -> headers.frameOptions(frame -> frame.disable())) // h2-console 같은 용도
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").permitAll() // 이 경로는 모두 허용
-                        .anyRequest().permitAll() // 나머지도 일단 허용 (개발용)
-                );
+        private final JwtUtil jwtUtil;
 
-        return http.build();
-    }
+        public SecurityConfig(JwtUtil jwtUtil){
+            this.jwtUtil = jwtUtil;
+        }
 
-    @Bean
-    public BCryptPasswordEncoder encode() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
 
-    // ✅ CORS 설정
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("*") // 필요 시 http://localhost:19006 등으로 제한
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
-            }
-        };
-    }@Configuration
-    public class WebConfig implements WebMvcConfigurer {
-        @Override
-        public void addCorsMappings(CorsRegistry registry) {
-            registry.addMapping("/**")
-                    .allowedOrigins("*") // 또는 프론트 IP만
-                    .allowedMethods("GET", "POST", "PUT", "DELETE");
+            http
+                    //crsf(Cross site Request forgery) 설정 disable
+                    .csrf((csrfConfig) ->
+                            csrfConfig.disable()
+                    )
+                    //h2-console 화면을 사용하기 위해 해당옵션 disable
+                    .headers((headerConfig) ->
+                            headerConfig.frameOptions(frameOptionsConfig ->
+                                    frameOptionsConfig.disable()
+                            )
+                    )
+                    //권한설정
+                    .authorizeHttpRequests((authorizeRequests) ->
+                            authorizeRequests
+                                    .requestMatchers("/users/login", "/users/signup").permitAll()  // 전체 접근 허용
+                                    .anyRequest().permitAll()
+                    )
+                    .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class) //JWT 필터 등록
+                    .exceptionHandling((exceptionConfig) ->
+                            exceptionConfig.authenticationEntryPoint(unauthorizedEntryPoint).accessDeniedHandler(accessDeniedHandler)
+                    ); // 401 403 관련 예외처리
+            return  http.build();
+        }
+
+        //401 예외처리
+        private final AuthenticationEntryPoint unauthorizedEntryPoint =
+                (request, response, authException) -> {
+                    ErrorResponse fail = new ErrorResponse(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED...");
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    String json = new ObjectMapper().writeValueAsString(fail);
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    PrintWriter writer = response.getWriter();
+                    writer.write(json);
+                    writer.flush();
+                };
+
+        //403 예외처리
+        private final AccessDeniedHandler accessDeniedHandler =
+                (request, response, accessDeniedException) -> {
+                    ErrorResponse fail = new ErrorResponse(HttpStatus.FORBIDDEN, "FORBIDDEN...");
+                    response.setStatus(HttpStatus.FORBIDDEN.value());
+                    String json = new ObjectMapper().writeValueAsString(fail);
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    PrintWriter writer = response.getWriter();
+                    writer.write(json);
+                    writer.flush();
+                };
+
+        @Getter
+        @RequiredArgsConstructor
+        public class ErrorResponse {
+
+            private final HttpStatus status;
+            private final String message;
+        }
+
+        //패스워드 암호화
+        @Bean
+        public BCryptPasswordEncoder encode() {
+            return new BCryptPasswordEncoder();
         }
     }
-
-}

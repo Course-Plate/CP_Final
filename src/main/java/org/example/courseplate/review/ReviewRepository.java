@@ -2,6 +2,9 @@ package org.example.courseplate.review;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.List;
+
 public interface ReviewRepository extends MongoRepository<Review, String> {
-    // 기본 CRUD 사용
+    List<Review> findByPlaceId(String placeId);
+    List<Review> findByUserId(String userId);
 }
