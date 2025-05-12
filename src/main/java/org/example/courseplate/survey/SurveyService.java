@@ -31,7 +31,7 @@ public class SurveyService {
         saveUserProfile(surveyDto.getUserId(), surveyDto.getPositiveKeywords(), surveyDto.getNegativeKeywords());
 
         // 2. 네이버 API 검색 (임시적으로 서울로 지정)
-        String rawJson = naverLocalSearchService.searchRestaurants("맛집", "서울");
+        String rawJson = naverLocalSearchService.searchRestaurants("맛집", "서울", 100);
         List<Restaurant> allResults = parseJsonToRestaurants(rawJson);
 
         // 3. 부정 키워드로 필터링
