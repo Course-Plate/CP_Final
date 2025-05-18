@@ -1,1 +1,0 @@
-export const BASE_URL = 'http://221.158.232.29:8080/CoursePlate';
