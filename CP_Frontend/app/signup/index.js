@@ -10,22 +10,26 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import CustomInput from '../../components/CustomInput';
 import PrimaryButton from '../../components/PrimaryButton';
-import { common, auth, lightColors, darkColors } from '../../styles';
+import {common, auth, lightColors, darkColors, preference} from '../../styles';
 import { useTheme } from '../../context/ThemeContext';
+import { BASE_URL } from "../../BASE_URL";
+import axios from 'axios';
 
-export default function Index() {
+export default function SignUpScreen() {
     const router = useRouter();
     const { isDarkMode } = useTheme();
     const colors = isDarkMode ? darkColors : lightColors;
 
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
-    const [code, setCode] = useState('');
+    const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [email, setEmail] = useState('');
+    const [sex, setSex] = useState('');
+    const [authCode, setAuthCode] = useState('');
     const [isVerified, setIsVerified] = useState(false);
     const [showCodeInput, setShowCodeInput] = useState(false);
 
@@ -38,34 +42,117 @@ export default function Index() {
     const isFormValid =
         name.trim() &&
         phone.trim() &&
+        userId.trim() &&
         password.trim() &&
         confirmPassword.trim() &&
         password === confirmPassword &&
+        email.trim() &&
+        sex.trim() &&
+        authCode.trim() &&
         isVerified;
 
-    const handleRequestVerification = () => {
+
+    // 전화번호 인증
+    const handleRequestVerification = async () => {
         if (!phone) {
             Alert.alert('오류', '전화번호를 입력해주세요.');
             return;
         }
 
-        Alert.alert('인증번호 전송됨');
-        console.log('📤 인증번호 요청:', phone);
-        setShowCodeInput(true);
+        try {
+            const response = await axios.post(`${BASE_URL}/auth/send-sms`, {
+                phoneNum: phone.replace(/[^0-9]/g, '') // 숫자만 추출하여 전송
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            Alert.alert('성공', response.data); // 서버 메시지 출력
+            console.log('📤 인증번호 요청:', phone);
+            setShowCodeInput(true);
+        } catch (error) {
+            console.error('❌ 인증번호 요청 실패:', error);
+            Alert.alert('실패', '인증번호 요청 중 문제가 발생했습니다.');
+        }
     };
 
+
+    // 회원가입
     const handleSignup = async () => {
         if (!isFormValid) {
             Alert.alert('입력 오류', '모든 항목을 올바르게 입력해주세요.');
             return;
         }
 
-        Alert.alert('회원가입 완료', `${name}님, 환영합니다!`);
-        console.log('👤 회원가입 요청:', { name, phone, password });
+        try {
+            // 1. 인증번호 검증 요청
+            const verifyResponse = await axios.post(`${BASE_URL}/auth/verify-sms`, {
+                phoneNum: phone.replace(/[^0-9]/g, ''),
+                authCode: authCode // 사용자가 입력한 인증번호 변수
+            });
 
-        await AsyncStorage.setItem('userName', name);
-        router.push('/login');
+            const isCodeValid = verifyResponse.data === true;
+
+            if (!isCodeValid) {
+                Alert.alert('인증 실패', '인증번호가 일치하지 않습니다.');
+                return;
+            }
+
+            // 2. 인증 성공 → 회원가입 요청
+            const signupResponse = await axios.post(`${BASE_URL}/auth/signup`, {
+                userId: userId, // 사용자 ID
+                userName: name,
+                password: password,
+                phoneNum: phone.replace(/[^0-9]/g, ''),
+                email: email,
+                sex: sex
+            });
+
+            // 3. 성공 처리
+            Alert.alert('회원가입 완료', `${name}님, 환영합니다!`);
+            console.log('👤 회원가입 성공:', signupResponse.data);
+            router.push('/login');
+
+        } catch (error) {
+            console.error('❌ 회원가입 또는 인증 실패:', error);
+            Alert.alert('오류', '회원가입 중 문제가 발생했습니다.');
+        }
     };
+
+
+
+    const renderButton = (label, selected, onPress, key) => (
+        <TouchableOpacity
+            key={key}
+            onPress={onPress}
+            style={[
+                preference.optionBtn,
+                selected && preference.optionBtnSelected,
+            ]}
+        >
+            <Text
+                style={[
+                    preference.optionText,
+                    selected && preference.optionTextSelected,
+                ]}
+            >
+                {label}
+            </Text>
+        </TouchableOpacity>
+    );
+
+
+
+
+
+
+    // ------------------------------------------------------------------------ //
+
+
+
+
+
 
     return (
         <KeyboardAvoidingView
@@ -132,9 +219,9 @@ export default function Index() {
                     {showCodeInput && (
                         <CustomInput
                             placeholder="인증번호 입력"
-                            value={code}
+                            value={authCode}
                             onChangeText={(text) => {
-                                setCode(text);
+                                setAuthCode(text);
                                 if (text.length >= 4) setIsVerified(true);
                             }}
                             keyboardType="number-pad"
@@ -144,6 +231,16 @@ export default function Index() {
                             placeholderTextColor={colors.placeholder}
                         />
                     )}
+
+                    <CustomInput
+                        placeholder="아이디"
+                        value={userId}
+                        onChangeText={setUserId}
+                        backgroundColor={colors.inputBg}
+                        color={colors.text}
+                        borderColor={colors.border}
+                        placeholderTextColor={colors.placeholder}
+                    />
 
                     <CustomInput
                         placeholder="비밀번호"
@@ -166,6 +263,23 @@ export default function Index() {
                         borderColor={confirmBorderColor}
                         placeholderTextColor={colors.placeholder}
                     />
+
+                    <CustomInput
+                        placeholder="이메일"
+                        value={email}
+                        onChangeText={setEmail}
+                        backgroundColor={colors.inputBg}
+                        color={colors.text}
+                        borderColor={colors.border}
+                        placeholderTextColor={colors.placeholder}
+                    />
+
+                    <Text style={[preference.label, { color: colors.text }]}>성별</Text>
+                    <View style={preference.optionRow}>
+                        {['남자', '여자'].map((s) =>
+                            renderButton(s, sex === s, () => setSex(s), s)
+                        )}
+                    </View>
 
                     <PrimaryButton
                         title="완료"

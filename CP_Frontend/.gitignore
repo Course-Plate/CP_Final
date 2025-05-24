@@ -50,3 +50,5 @@ xcuserdata/
 
 # Gradle wrapper 로그
 gradle-app.setting
+
+BASE_URL.js

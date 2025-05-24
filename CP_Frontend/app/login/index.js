@@ -3,24 +3,57 @@ import { View, Text, TextInput, Image, TouchableOpacity, Alert } from 'react-nat
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../context/ThemeContext';
 import { common, auth, lightColors, darkColors } from '../../styles';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BASE_URL } from "../../BASE_URL";
+import axios from 'axios';
 
 export default function LoginScreen() {
     const router = useRouter();
-    const [phone, setPhone] = useState('');
+    const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
     const { isDarkMode } = useTheme();
 
     const colors = isDarkMode ? darkColors : lightColors;
 
-    const handleLogin = () => {
-        if (!phone || !password) {
-            Alert.alert('입력 오류', '전화번호와 비밀번호를 입력해주세요.');
+
+    // 로그인
+    const handleLogin = async () => {
+        if (!userId || !password) {
+            Alert.alert('입력 오류', '아이디와 비밀번호를 입력해주세요.');
             return;
         }
-        console.log('로그인 시도:', { phone, password });
-        Alert.alert('로그인 성공', `${phone}님 환영합니다!`);
-        router.push('/home');
+
+        try {
+            const response = await axios.post(`${BASE_URL}/auth/login`, {
+                userId,
+                password
+            });
+
+            const token = response.data.token;
+
+            if (token) {
+                await AsyncStorage.setItem('token', token);
+                await AsyncStorage.setItem('userId', userId);
+
+                Alert.alert('로그인 성공', `${userId}님 환영합니다!`);
+                console.log('✅ 로그인 성공:', token);
+                router.replace('/home');
+            } else {
+                Alert.alert('오류', '토큰이 존재하지 않습니다.');
+            }
+
+        } catch (error) {
+            console.error('❌ 로그인 실패:', error);
+            if (error.response && error.response.status === 400) {
+                Alert.alert('로그인 실패', '아이디 또는 비밀번호가 올바르지 않습니다.');
+            } else {
+                Alert.alert('오류', '로그인 중 문제가 발생했습니다.');
+            }
+        }
     };
+
+
+
 
     return (
         <View style={[common.startContainer, { backgroundColor: colors.background }]}>
@@ -41,12 +74,10 @@ export default function LoginScreen() {
                         borderWidth: 1,
                     },
                 ]}
-                placeholder="전화번호 (- 없이)"
+                placeholder="아이디"
                 placeholderTextColor={colors.placeholder}
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                autoCapitalize="none"
+                value={userId}
+                onChangeText={setUserId}
             />
 
             <TextInput
