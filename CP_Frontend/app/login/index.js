@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Image, TouchableOpacity, Alert } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {View, Text, TextInput, Image, TouchableOpacity, Alert, BackHandler} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../context/ThemeContext';
 import { common, auth, lightColors, darkColors } from '../../styles';
@@ -14,6 +14,36 @@ export default function LoginScreen() {
     const { isDarkMode } = useTheme();
 
     const colors = isDarkMode ? darkColors : lightColors;
+
+
+    useEffect(() => {
+        const backAction = () => {
+            // Alert을 띄워 사용자에게 확인을 요청
+            Alert.alert(
+                "종료", // 제목
+                "CoursePlate를 종료하시겠습니까?", // 내용
+                [
+                    {
+                        text: "취소", // 취소 버튼
+                        onPress: () => null, // 아무 동작도 하지 않음
+                        style: "cancel",
+                    },
+                    {
+                        text: "확인", // 확인 버튼
+                        onPress: () => BackHandler.exitApp(), // 앱 종료
+                    },
+                ],
+                { cancelable: false } // Alert 밖을 클릭해도 닫히지 않음
+            );
+            return true; // 뒤로가기 이벤트를 처리했음을 반환
+        };
+
+        // 뒤로가기 버튼 이벤트 리스너 추가
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+        // 컴포넌트 언마운트 시 리스너 제거
+        return () => backHandler.remove();
+    }, []);
 
 
     // 로그인

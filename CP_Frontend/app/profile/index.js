@@ -1,10 +1,14 @@
 // app/profile/index.js
 
-import {View, Text, Image, BackHandler} from 'react-native';
+import {View, Text, Image, BackHandler, Alert, TouchableOpacity} from 'react-native';
 import common from "../../styles/common";
 import { useFont } from "../../context/FontContext";
-import {useEffect} from "react";
+import React, {useEffect} from "react";
 import { useRouter } from "expo-router";
+import axios from "axios";
+import {BASE_URL} from "../../BASE_URL";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { home } from "../../styles";
 
 export default function Profile() {
 
@@ -31,6 +35,41 @@ export default function Profile() {
         return () => backHandler.remove(); // 컴포넌트 언마운트 시 이벤트 제거
     }, []);
 
+
+    const confirmAndDeleteUser = () => {
+        Alert.alert(
+            "회원 삭제 확인",
+            "정말로 회원을 삭제하시겠습니까?",
+            [
+                {
+                    text: "취소",
+                    style: "cancel"
+                },
+                {
+                    text: "삭제",
+                    style: "destructive",
+                    onPress: () => deleteUser()
+                }
+            ]
+        );
+    };
+
+
+    const deleteUser = async () => {
+        const userId = await AsyncStorage.getItem('userId');
+
+        try {
+            await axios.delete(`${BASE_URL}/users/delete`, { params: { userId }});
+            await AsyncStorage.clear();
+
+            Alert.alert("삭제 완료", "회원이 삭제되었습니다.");
+            router.replace('/login');
+        } catch (e) {
+            Alert.alert("삭제 실패", "오류가 발생했습니다.");
+            console.log(e.message);
+        }
+    }
+
     return (
         <View style={common.startContainer}>
 
@@ -49,9 +88,23 @@ export default function Profile() {
             <Text style={[common.buttonText, {color: 'black', fontSize: 25, marginLeft: 0, marginBottom: 5}]}>Password</Text>
             <View style={common.view}><Text style={[common.buttonText, {color: 'black'}]}>abcdefghijklmnop</Text></View>
 
-            {/* 리뷰 포인트 */}
-            <Text style={[common.buttonText, {color: 'black', fontSize: 25, marginLeft: 0, marginBottom: 5}]}>Review Point</Text>
-            <View style={common.view}><Text style={[common.buttonText, {color: 'black'}]}>50 P</Text></View>
+            {/* 회원탈퇴 */}
+            <TouchableOpacity
+                key={tab}
+                onPress={() => confirmAndDeleteUser()}
+                style={[
+                    home.tabButton,
+                    { backgroundColor: isDarkMode ? '#444' : '#eee' }
+                ]}
+            >
+                <Text
+                    style={[
+                        { color: isDarkMode ? '#aaa' : '#333', fontWeight: 'bold' }
+                    ]}
+                >
+                    회원 탈퇴
+                </Text>
+            </TouchableOpacity>
 
         </View>
     );

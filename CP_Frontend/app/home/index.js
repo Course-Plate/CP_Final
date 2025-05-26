@@ -13,6 +13,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useFont } from "../../context/FontContext";
 import { common, home, lightColors, darkColors } from '../../styles';
 import { useFocusEffect } from '@react-navigation/native';
+import axios from "axios";
+import {BASE_URL} from "../../BASE_URL";
 
 export default function HomeScreen() {
 
@@ -34,8 +36,11 @@ export default function HomeScreen() {
 
     useEffect(() => {
         const loadUserData = async () => {
-            const name = await AsyncStorage.getItem('userName');
-            if (name) setUserName(name);
+
+            const userId = await AsyncStorage.getItem('userId');
+            const response = await axios.get(`${BASE_URL}/users/userid/${userId}`)
+
+            console.log(response);
 
             const regionData = await AsyncStorage.getItem('selectedRegion');
             if (regionData) setRegion(JSON.parse(regionData));
