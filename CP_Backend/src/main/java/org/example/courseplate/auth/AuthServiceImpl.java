@@ -19,7 +19,7 @@ import java.util.concurrent.*;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private final Map<Integer, String> authCodeStorage = new ConcurrentHashMap<>();
+    private final Map<String, String> authCodeStorage = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @Value("${coolsms.api.key}")
@@ -69,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
 
     // SMS 인증번호 전송
     @Override
-    public void sendSmsAuthCode(Integer phoneNum) {
+    public void sendSmsAuthCode(String phoneNum) {
         String authCode = generateAuthCode();
 
         // 기존 코드 덮어쓰기
@@ -78,10 +78,11 @@ public class AuthServiceImpl implements AuthService {
         // 5분 후 자동 삭제
         scheduler.schedule(() -> authCodeStorage.remove(phoneNum), 5, TimeUnit.MINUTES);
 
+        System.out.println(phoneNum);
         // CoolSMS API 연동
         Message message = new Message(apiKey, apiSecret);
         HashMap<String, String> params = new HashMap<>();
-        params.put("to", String.valueOf(phoneNum));
+        params.put("to", phoneNum);
         params.put("from", fromPhone);
         params.put("type", "SMS");
         params.put("text", "[CoursePlate] 인증번호: " + authCode);
@@ -97,7 +98,7 @@ public class AuthServiceImpl implements AuthService {
 
     // SMS 인증번호 검증
     @Override
-    public boolean verifySmsCode(Integer phoneNum, String authCode) {
+    public boolean verifySmsCode(String phoneNum, String authCode) {
         return authCodeStorage.getOrDefault(phoneNum, "").equals(authCode);
     }
 }

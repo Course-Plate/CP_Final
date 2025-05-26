@@ -21,7 +21,7 @@ export default function HomeScreen() {
     const router = useRouter();
     const { fontsLoaded } = useFont();  // 폰트 로드 상태 가져오기
     const { isDarkMode } = useTheme();
-    const [userName, setUserName] = useState('사용자');
+    const [User, setUser] = useState({});
     const [menuOpen, setMenuOpen] = useState(false);
     const [region, setRegion] = useState(null);
     const [selectedTab, setSelectedTab] = useState('region');
@@ -39,8 +39,7 @@ export default function HomeScreen() {
 
             const userId = await AsyncStorage.getItem('userId');
             const response = await axios.get(`${BASE_URL}/users/userid/${userId}`)
-
-            console.log(response);
+            setUser(response.data);
 
             const regionData = await AsyncStorage.getItem('selectedRegion');
             if (regionData) setRegion(JSON.parse(regionData));
@@ -124,10 +123,13 @@ export default function HomeScreen() {
 
                 <View style={home.topRow}>
                     <View style={home.leftProfile}>
-                        <TouchableOpacity onPress={() => router.push('/profile')}>
+                        <TouchableOpacity onPress={() => router.push({
+                            pathname: '/profile',
+                            params: { User: JSON.stringify(User) }
+                        })}>
                             <View style={common.avatarCircle} />
                         </TouchableOpacity>
-                        <Text style={[home.nameText]}>{userName}</Text>
+                        <Text style={[home.nameText]}>{User.userName}</Text>
                     </View>
                     <TouchableOpacity onPress={() => setMenuOpen(true)}>
                         <Image

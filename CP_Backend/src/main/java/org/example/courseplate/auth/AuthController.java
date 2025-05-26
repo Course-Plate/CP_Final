@@ -48,8 +48,8 @@ public class AuthController {
 
     // 인증번호 요청 API
     @PostMapping("/send-sms")
-    public ResponseEntity<String> sendSms(@RequestBody Map<String, Integer> request) {
-        Integer phoneNum = request.get("phoneNum");
+    public ResponseEntity<String> sendSms(@RequestBody Map<String, String> request) {
+        String phoneNum = request.get("phoneNum");
         authService.sendSmsAuthCode(phoneNum);
         return ResponseEntity.ok("인증번호가 발송되었습니다.");
     }
@@ -57,7 +57,7 @@ public class AuthController {
     // 인증번호 확인 API
     @PostMapping("/verify-sms")
     public ResponseEntity<Boolean> verifySms(@RequestBody Map<String, String> request) {
-        Integer phoneNum = Integer.valueOf(request.get("phoneNum"));
+        String phoneNum = request.get("phoneNum");
         String authCode = request.get("authCode");
 
         boolean isValid = authService.verifySmsCode(phoneNum, authCode);

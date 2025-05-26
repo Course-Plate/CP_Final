@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     KeyboardAvoidingView,
     ScrollView,
@@ -6,7 +6,7 @@ import {
     View,
     Text,
     TouchableOpacity,
-    Alert,
+    Alert, BackHandler,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -51,6 +51,21 @@ export default function SignUpScreen() {
         authCode.trim() &&
         isVerified;
 
+    const handleBackPress = () => {
+        router.back(); // 뒤로 가기
+    };
+
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            () => {
+                handleBackPress(); // 뒤로 가기 호출
+                return true; // 뒤로 가기 이벤트를 처리했다고 알려줌
+            }
+        );
+
+        return () => backHandler.remove(); // 컴포넌트 언마운트 시 이벤트 제거
+    }, []);
 
     // 전화번호 인증
     const handleRequestVerification = async () => {

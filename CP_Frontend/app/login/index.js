@@ -62,6 +62,7 @@ export default function LoginScreen() {
             const token = response.data.token;
 
             if (token) {
+                await AsyncStorage.clear();
                 await AsyncStorage.setItem('token', token);
                 await AsyncStorage.setItem('userId', userId);
 
