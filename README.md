@@ -15,6 +15,22 @@ http://localhost:8080/CoursePlate/
 
 ---
 
+## 설문조사 키워드
+
+- **POST** `/api/survey/submit`
+
+```json
+{ "userId": "test1", "likeKeywords": ["한식", "조용한"], "dislikeKeywords": ["혼잡한", "시끄러운"] }
+```
+
+---
+
+## 네이버 API 기반 음식점 추천
+
+- **GET** `/api/naver/filtered/{userId}?location=지역`
+
+---
+
 ## User API
 
 ---
