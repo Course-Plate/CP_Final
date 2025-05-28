@@ -3,5 +3,5 @@
 
 ##  실행 가이드
 
-[CoursePlate 실행가이드 (word)](./CoursePlate_SetupGuide.docx)
+[CoursePlate 실행가이드 (word)](./CoursePlate_SetupGuide_.docx)
 
