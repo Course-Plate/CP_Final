@@ -11,8 +11,3 @@
   - **targetSdkVersion** 34 (Android 13)
   - **minSdkVersion** 24 (Android 7.0)
 
-
-##  실행 가이드
-
-[CoursePlate 실행가이드 (word)](./CoursePlate_SetupGuide.docx)
-
