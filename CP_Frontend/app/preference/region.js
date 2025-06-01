@@ -11,14 +11,7 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '../../context/ThemeContext';
 import BackButton from '../../components/BackButton';
 import { common, region, lightColors, darkColors } from '../../styles';
-
-const REGION_DATA = {
-    '서울특별시': ['강남구', '강서구', '종로구', '마포구'],
-    '경기도': ['수원시', '성남시', '고양시', '용인시', '의정부시', '파주시'],
-    '강원도': ['춘천시', '원주시', '강릉시'],
-    '부산광역시': ['해운대구', '서면', '남구'],
-    '제주특별자치도': ['제주시', '서귀포시'],
-};
+import REGION_DATA from '../../data/regionData';
 
 export default function RegionScreen() {
     const router = useRouter();
