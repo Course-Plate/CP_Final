@@ -17,6 +17,7 @@ import axios from 'axios';
 import { BASE_URL } from '../../BASE_URL';
 
 export default function ReviewScreen() {
+    const [User, setUser] = useState({});
     const [store, setStore] = useState(null);
     const [reviewText, setReviewText] = useState('');
     const [rating, setRating] = useState(0);
@@ -31,12 +32,22 @@ export default function ReviewScreen() {
             if (data) {
                 const parsed = JSON.parse(data);
                 setStore(parsed);
+                console.log(`store : ${data}`);
             } else {
                 Alert.alert('리뷰 불가', '리뷰 가능한 가게 정보가 없습니다.');
                 router.back();
             }
         };
+
+
+        const loadUser = async () => {
+            const user = await AsyncStorage.getItem('user');
+            setUser(user);
+            console.log(user);
+        };
+
         loadStore();
+        loadUser();
     }, []);
 
     const handlePickImage = async () => {
@@ -75,7 +86,7 @@ export default function ReviewScreen() {
 
             // 3) POST 요청: http://<BASE_URL>/reviews
             //    백엔드가 내부에서 이 텍스트를 AI 서버로 보내 분석하도록 구현되어 있어야 함
-            await axios.post(`${BASE_URL}/reviews`, payload);
+            await axios.post(`${BASE_URL}/reviews/write`, payload);
 
             // 4) 로컬 예약 정보 삭제 및 완료 안내
             await AsyncStorage.removeItem('review_eligible');

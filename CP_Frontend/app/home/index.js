@@ -38,7 +38,7 @@ export default function HomeScreen() {
         const loadUserData = async () => {
 
             const userId = await AsyncStorage.getItem('userId');
-            const response = await axios.get(`${BASE_URL}/users/userid/${userId}`)
+            const response = await axios.get(`${BASE_URL}/users/userid/${userId}`);
             setUser(response.data);
 
             const regionData = await AsyncStorage.getItem('selectedRegion');

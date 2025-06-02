@@ -66,6 +66,9 @@ export default function LoginScreen() {
                 await AsyncStorage.setItem('token', token);
                 await AsyncStorage.setItem('userId', userId);
 
+                const user = await axios.get(`${BASE_URL}/users/userid/${userId}`);
+                await AsyncStorage.setItem('user', JSON.stringify(user.data));
+
                 Alert.alert('로그인 성공', `${userId}님 환영합니다!`);
                 console.log('✅ 로그인 성공:', token);
                 router.replace('/home');
