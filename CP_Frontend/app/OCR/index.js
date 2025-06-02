@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {View, Text, StyleSheet, TouchableOpacity, Alert, Image, BackHandler} from 'react-native';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker'; // ✅ 변경
 import TextRecognition from 'react-native-text-recognition';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,6 +15,22 @@ export default function OCRScreen() {
     const { isDarkMode } = useTheme();
     const colors = isDarkMode ? darkColors : lightColors;
 
+    const handleBackPress = () => {
+        router.back(); // 뒤로 가기
+    };
+
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            () => {
+                handleBackPress(); // 뒤로 가기 호출
+                return true; // 뒤로 가기 이벤트를 처리했다고 알려줌
+            }
+        );
+
+        return () => backHandler.remove(); // 컴포넌트 언마운트 시 이벤트 제거
+    }, []);
+
     const handleImageSelect = async (fromCamera = false) => {
         try {
             const options = {
@@ -23,6 +39,7 @@ export default function OCRScreen() {
             };
 
             const result = fromCamera ? await launchCamera(options) : await launchImageLibrary(options);
+            console.log('📸 launchCamera result:', result);
 
             if (result.didCancel || !result.assets || result.assets.length === 0) return;
 
@@ -45,7 +62,7 @@ export default function OCRScreen() {
             const storeName = parsed.title?.replace(/<[^>]+>/g, '');
             if (textCombined.includes(storeName)) {
                 setLoading(false);
-                router.push('/review');
+                router.replace('/review');
             } else {
                 setLoading(false);
                 Alert.alert('인증 실패', `"${storeName}" 가게명이 영수증에서 인식되지 않았습니다.`);

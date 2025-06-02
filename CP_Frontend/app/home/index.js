@@ -232,7 +232,7 @@ export default function HomeScreen() {
             {receiptStore && (
                 <View style={{ alignItems: 'center', marginTop: 16 }}>
                     <TouchableOpacity
-                        onPress={() => router.push('/review')}
+                        onPress={() => router.push('/OCR')}
                         style={[common.button, { backgroundColor: colors.accent, paddingHorizontal: 40 }]}
                     >
                         <Text style={[common.buttonText, { color: '#fff' }]}>📝 리뷰 작성</Text>

@@ -6,7 +6,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     Image,
-    Alert,
+    Alert, BackHandler,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchImageLibrary } from 'react-native-image-picker'; // ✅ 변경
@@ -25,6 +25,22 @@ export default function ReviewScreen() {
     const router = useRouter();
     const { isDarkMode } = useTheme();
     const colors = isDarkMode ? darkColors : lightColors;
+
+    const handleBackPress = () => {
+        router.back(); // 뒤로 가기
+    };
+
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            () => {
+                handleBackPress(); // 뒤로 가기 호출
+                return true; // 뒤로 가기 이벤트를 처리했다고 알려줌
+            }
+        );
+
+        return () => backHandler.remove(); // 컴포넌트 언마운트 시 이벤트 제거
+    }, []);
 
     useEffect(() => {
         const loadStore = async () => {
@@ -90,7 +106,7 @@ export default function ReviewScreen() {
 
             // 4) 로컬 예약 정보 삭제 및 완료 안내
             await AsyncStorage.removeItem('review_eligible');
-            Alert.alert('감사합니다!', '리뷰 분석 요청이 완료되었습니다.');
+            Alert.alert('감사합니다!', '리뷰가 작성되었습니다.');
             router.replace('/home');
         } catch (error) {
             console.error('❌ 리뷰 분석 요청 실패:', error.response || error.message);
@@ -98,10 +114,6 @@ export default function ReviewScreen() {
         }
         // 저장 로직은 서버 또는 로컬 DB에 연결
         console.log('📦 제출됨:', { store, reviewText, rating, imageUri });
-/*
-        await AsyncStorage.removeItem('review_eligible');
-        Alert.alert('감사합니다!', '리뷰가 저장되었습니다.');
-        router.replace('/home');*/
     };
 
     return (
