@@ -13,6 +13,8 @@ import { launchImageLibrary } from 'react-native-image-picker'; // ✅ 변경
 import { useTheme } from '../../context/ThemeContext';
 import { lightColors, darkColors } from '../../styles';
 import { useRouter } from 'expo-router';
+import axios from 'axios';
+import { BASE_URL } from '../../BASE_URL';
 
 export default function ReviewScreen() {
     const [store, setStore] = useState(null);
@@ -54,12 +56,41 @@ export default function ReviewScreen() {
             return;
         }
 
+        try {
+            // 1) AsyncStorage에서 로그인된 userId 가져오기
+            const userId = await AsyncStorage.getItem('userId');
+            if (!userId) {
+                Alert.alert('로그인 필요', '먼저 로그인 후 이용해주세요.');
+                router.replace('/login');
+                return;
+            }
+
+            // 2) 백엔드로 보낼 페이로드 구성 (사용자 ID와 리뷰 텍스트만)
+            const payload = {
+                userId: userId,
+                reviewText: reviewText,
+            };
+
+
+
+            // 3) POST 요청: http://<BASE_URL>/reviews
+            //    백엔드가 내부에서 이 텍스트를 AI 서버로 보내 분석하도록 구현되어 있어야 함
+            await axios.post(`${BASE_URL}/reviews`, payload);
+
+            // 4) 로컬 예약 정보 삭제 및 완료 안내
+            await AsyncStorage.removeItem('review_eligible');
+            Alert.alert('감사합니다!', '리뷰 분석 요청이 완료되었습니다.');
+            router.replace('/home');
+        } catch (error) {
+            console.error('❌ 리뷰 분석 요청 실패:', error.response || error.message);
+            Alert.alert('오류', '리뷰 분석 중 문제가 발생했습니다.');
+        }
         // 저장 로직은 서버 또는 로컬 DB에 연결
         console.log('📦 제출됨:', { store, reviewText, rating, imageUri });
-
+/*
         await AsyncStorage.removeItem('review_eligible');
         Alert.alert('감사합니다!', '리뷰가 저장되었습니다.');
-        router.replace('/home');
+        router.replace('/home');*/
     };
 
     return (
