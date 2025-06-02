@@ -105,9 +105,32 @@ export default function SearchScreen() {
             );
 
             const filteredStores = response.data.items || [];
+            const now = new Date().toISOString().split('T')[0];
 
             setStores(filteredStores);
             markerRefs.current = new Array(filteredStores.length);
+
+            const newRecord = {
+                id: Date.now().toString(),   // 고유 ID
+                date: now,
+                region: location,
+            };
+
+            const existing = await AsyncStorage.getItem('searchHistory');
+            let history = existing ? JSON.parse(existing) : [];
+
+            const isDuplicate = history.some(
+                (item) => item.date === newRecord.date && item.region === newRecord.region
+            );
+
+            if (!isDuplicate) {
+                history.unshift(newRecord); // 최신 기록 앞에 추가
+                await AsyncStorage.setItem('searchHistory', JSON.stringify(history));
+            }
+
+            await AsyncStorage.setItem('cachedStores', JSON.stringify(filteredStores));
+            await AsyncStorage.setItem('searchedAt', now);
+            await AsyncStorage.setItem('searchedRegion', location);
         } catch (error) {
             console.error('❌ 필터링된 맛집 API 호출 실패:', error);
             setStores([]);
