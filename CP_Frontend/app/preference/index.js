@@ -9,7 +9,9 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
 import { common, preference, lightColors, darkColors } from '../../styles';
-import BackButton from '../../components/BackButton'; // ✅ 추가
+import BackButton from '../../components/BackButton';
+import axios from "axios";
+import { BASE_URL } from "../../BASE_URL";
 
 export default function PreferenceScreen() {
     const router = useRouter();
@@ -54,7 +56,7 @@ export default function PreferenceScreen() {
         }, [])
     );
 
-    const savePreferences = async () => {
+    const survey = async () => {
         const preferences = {
             type: selectedType,
             allergy: selectedAllergy,
@@ -62,9 +64,45 @@ export default function PreferenceScreen() {
             temperature,
             budget,
         };
-        await AsyncStorage.setItem('preferences', JSON.stringify(preferences));
-        router.replace('/home');
+
+        const userId = await AsyncStorage.getItem('userId');
+        const province = await AsyncStorage.getItem('selectedProvince');
+        const city = await AsyncStorage.getItem('selectedCity');
+        console.log(selectedAllergy);
+
+        const payload = {
+            userId: userId || 'unknown',
+            likeKeywords: [selectedType, spicy === '선호' ? '매운' : '', temperature, budget].filter(Boolean),
+            dislikeKeywords: Array.isArray(selectedAllergy)
+                ? selectedAllergy.map((item) => typeof item === 'string' ? item : item.label)
+                : [],
+            region: {
+                province: province,
+                city: city
+            }
+        };
+        console.log(payload);
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/api/survey/submit`,
+                payload,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            console.log('서버 응답:', response.data);
+
+            await AsyncStorage.setItem('preferences', JSON.stringify(preferences));
+            router.replace('/home');
+        } catch (error) {
+            console.error('설문 제출 실패:', error);
+            alert('설문 제출 중 오류가 발생했습니다.');
+        }
     };
+
 
     const renderButton = (label, selected, onPress, key) => (
         <TouchableOpacity
@@ -165,7 +203,7 @@ export default function PreferenceScreen() {
                 </View>
 
                 {/* 완료 버튼 */}
-                <TouchableOpacity style={preference.submitBtn} onPress={savePreferences}>
+                <TouchableOpacity style={preference.submitBtn} onPress={survey}>
                     <Text style={preference.submitText}>설문 완료</Text>
                 </TouchableOpacity>
             </View>

@@ -30,8 +30,13 @@ public class SurveyService {
         // 1. 사용자 프로필 저장
         saveUserProfile(surveyDto.getUserId(), surveyDto.getPositiveKeywords(), surveyDto.getNegativeKeywords());
 
-        // 2. 네이버 API 검색 (임시적으로 서울로 지정)
-        String rawJson = naverLocalSearchService.searchRestaurants("맛집", "서울", 100);
+        // 2. 네이버 API 검색 (사용자 선택 지역 기반)
+        String regionString = Optional.ofNullable(surveyDto.getRegion())
+                .map(r -> r.getProvince() + " " + r.getCity())
+                .orElse("서울"); // fallback
+
+        String rawJson = naverLocalSearchService.searchRestaurants("맛집", regionString, 100);
+
         List<Restaurant> allResults = parseJsonToRestaurants(rawJson);
 
         // 3. 부정 키워드로 필터링
@@ -42,6 +47,7 @@ public class SurveyService {
 
         return filteredResults;
     }
+
 
     // ✅ 네이버 API 응답 파싱
     private List<Restaurant> parseJsonToRestaurants(String json) {

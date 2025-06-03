@@ -67,6 +67,8 @@ export default function RegionScreen() {
 
         try {
             await AsyncStorage.setItem('selectedRegion', JSON.stringify(region));
+            await AsyncStorage.setItem('selectedProvince', selectedProvince);
+            await AsyncStorage.setItem('selectedCity', selectedCity);
             Alert.alert('저장 완료', `${selectedProvince} ${selectedCity} 저장됨`);
             router.replace('/home');
         } catch (e) {

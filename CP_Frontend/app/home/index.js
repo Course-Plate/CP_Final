@@ -262,16 +262,6 @@ export default function HomeScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[common.drawerItem, {
-                        borderBottomColor: colors.border,
-                        borderBottomWidth: 1,
-                        paddingVertical: 14,
-                    }]}
-                >
-                    <Text style={{ fontSize: 16, color: colors.text }}>알림</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
                     onPress={handleLogout}
                     style={[common.drawerItem, { paddingVertical: 14 }]}
                 >
